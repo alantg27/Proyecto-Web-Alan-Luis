@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket de Turno</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+
+  <h1>Ticket de Turno</h1>
+  
+  {% set messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+  <div style="margin-bottom: 15px;">
+    {% for category, message in messages %}
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+
+  <form method="POST">
+    <div class="form-group full">
+      <label for="nombreCompleto">Nombre completo de quien realizará el trámite:</label>
+      <input type="text" id="nombreCompleto" name="nombreCompleto" value="{{ form_data['nombreCompleto'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group full">
+      <label for="curp">CURP:</label>
+      <input type="text" id="curp" name="curp" value="{{ form_data['curp'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" value="{{ form_data['nombre'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="paterno">Paterno:</label>
+      <input type="text" id="paterno" name="paterno" value="{{ form_data['paterno'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="materno">Materno:</label>
+      <input type="text" id="materno" name="materno" value="{{ form_data['materno'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="telefono">Teléfono:</label>
+      <input type="text" id="telefono" name="telefono" value="{{ form_data['telefono'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="celular">Celular:</label>
+      <input type="text" id="celular" name="celular" value="{{ form_data['celular'] if form_data else '' }}">
+    </div>
+    <div class="form-group full">
+      <label for="correo">Correo:</label>
+      <input type="email" id="correo" name="correo" value="{{ form_data['correo'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group full">
+      <label for="nivel">¿Nivel al que desea ingresar o que ya cursa el alumno?</label>
+      <select id="nivel" name="nivel">
+        <option value="">Seleccione...</option>
+        <option value="1" {% if form_data and form_data['nivel'] == '1' %}selected{% endif %}>Primaria</option>
+        <option value="2" {% if form_data and form_data['nivel'] == '2' %}selected{% endif %}>Secundaria</option>
+        <option value="3" {% if form_data and form_data['nivel'] == '3' %}selected{% endif %}>Bachillerato</option>
+      </select>
+    </div>
+
+    <div class="form-group full">
+      <label for="municipio">Municipio donde desea estudie el alumno:</label>
+      <select id="municipio" name="municipio">
+        <option value="">Seleccione...</option>
+        <option value="1" {% if form_data and form_data['municipio'] == '1' %}selected{% endif %}>Morelos</option>
+        <option value="2" {% if form_data and form_data['municipio'] == '2' %}selected{% endif %}>Allende</option>
+        <option value="3" {% if form_data and form_data['municipio'] == '3' %}selected{% endif %}>Saltillo</option>
+      </select>
+    </div>
+
+    <div class="form-group full">
+      <label for="asunto">Seleccione el asunto que va a tratar:</label>
+      <select id="asunto" name="asunto">
+        <option value="">Seleccione...</option>
+        <option value="1" {% if form_data and form_data['asunto'] == '1' %}selected{% endif %}>Inscripción</option>
+        <option value="2" {% if form_data and form_data['asunto'] == '2' %}selected{% endif %}>Reinscripción</option>
+        <option value="3" {% if form_data and form_data['asunto'] == '3' %}selected{% endif %}>Cambio de escuela</option>
+      </select>
+    </div>
+
+    <div class="form-group full" style="text-align:center;">
+      <button type="submit">Generar Ticket</button>
+    </div>
+  </form>
+
+  <script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+</body>
+</html>
