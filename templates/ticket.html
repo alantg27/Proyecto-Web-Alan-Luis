@@ -5,21 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ticket de Turno</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+
+<div class="top-nav" style="background:none;border:none; justify-content:flex-end;">
+    <a href="{{ url_for('publico') }}" class="right">Regresar</a>
+  </div>
+
 </head>
 <body>
 
   <h1>Ticket de Turno</h1>
-  
-  {% set messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-  <div style="margin-bottom: 15px;">
-    {% for category, message in messages %}
-        {{ message }}
-      </div>
-    {% endfor %}
-  </div>
-{% endif %}
-
 
   <form method="POST">
     <div class="form-group full">

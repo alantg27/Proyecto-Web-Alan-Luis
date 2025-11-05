@@ -190,7 +190,8 @@ class Ticket:
             rows = []
         conn.close()
         return rows
-
+    
+    # ---------- CONTAR POR STATUS ----------
     @staticmethod
     def contar_por_status(id_municipio=None):
         conn = DatabaseConnection.get_instance()
@@ -214,6 +215,23 @@ class Ticket:
                 resueltos = cnt
         total = pendientes + resueltos
         return {"Pendiente": pendientes, "Resuelto": resueltos, "Total": total}
+    
+    # ---------- OBTENER POR CURP Y TURNO ----------
+    @staticmethod
+    def obtener_por_curp_turno(curp, turno):
+        conn = DatabaseConnection.get_instance()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("""
+            SELECT t.*, n.nombre AS nivel, m.nombre AS municipio, a.nombre AS asunto
+            FROM ticket t
+            LEFT JOIN nivel n ON t.id_nivel = n.id_nivel
+            LEFT JOIN municipio m ON t.id_municipio = m.id_municipio
+            LEFT JOIN asunto a ON t.id_asunto = a.id_asunto
+            WHERE t.curp = %s AND t.turno = %s
+        """, (curp, turno))
+        row = cursor.fetchone()
+        conn.close()
+        return row
 
 # ------------------------------
 # CLASE CATALOGO

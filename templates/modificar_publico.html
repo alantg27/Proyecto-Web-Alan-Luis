@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modificar Ticket - Público</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+
+  <h1>Modificar Ticket</h1>
+
+  <!-- Barra superior con botón Regresar -->
+  <div class="top-nav" style="background:none;border:none; justify-content:flex-end;">
+    <a href="{{ url_for('publico') }}" class="right">Regresar</a>
+  </div>
+
+  <div style="max-width:1000px;margin:0 auto;background:#fff;padding:20px;border:2px solid #000;text-align:center;">
+    <p>Inserte la información del ticket que desea modificar:</p>
+
+    <form method="POST">
+      <div class="form-group full">
+        <label for="curp">CURP:</label>
+        <input type="text" id="curp" name="curp" placeholder="Ingrese CURP del ticket">
+      </div>
+
+      <div class="form-group full">
+        <label for="turno">Número de turno:</label>
+        <input type="text" id="turno" name="turno" placeholder="Ingrese número de turno">
+      </div>
+
+      <div class="form-group full" style="text-align:center;">
+        <button type="submit">Buscar Ticket</button>
+      </div>
+    </form>
+
+    <p style="margin-top:15px; font-size:14px; color:#555;">
+      Debe buscar con CURP y número de turno. Una vez localizado el ticket, podrá modificar los campos permitidos.
+    </p>
+  </div>
+
+</body>
+</html>

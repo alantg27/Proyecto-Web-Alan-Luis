@@ -151,6 +151,8 @@ def ticket():
             flash("Ya existe un ticket pendiente con esa CURP. Solo puedes crear otro cuando esté resuelto.", "error")
             return render_template("ticket.html", form_data=request.form)
         
+    
+        
 #        if Ticket.existe_curp(curp):
 #            flash("El CURP ingresado ya se encuentra registrado. No puede duplicar el ticket.", "error")
 #            return render_template("ticket.html", form_data=request.form)
@@ -175,6 +177,61 @@ def ticket():
         return redirect(url_for("ticket"))
 
     return render_template("ticket.html")
+
+# Formulario para buscar ticket público
+@app.route("/modificar_publico", methods=["GET", "POST"])
+def modificar_publico():
+    if request.method == "POST":
+        curp = request.form.get("curp", "").strip().upper()
+        turno = request.form.get("turno", "").strip()
+
+        # Buscamos el ticket por CURP y turno
+        ticket = Ticket.obtener_por_curp_turno(curp, turno)
+        if ticket:
+            return redirect(url_for("editar_publico", id_ticket=ticket["id_ticket"]))
+        else:
+            flash("No se encontró un ticket con esos datos.", "error")
+            return render_template("modificar_publico.html", form_data=request.form)
+
+    return render_template("modificar_publico.html")
+
+# Editar ticket público
+@app.route("/modificar_publico/editar/<int:id_ticket>", methods=["GET", "POST"])
+def editar_publico(id_ticket):
+    ticket = Ticket.obtener_por_id(id_ticket)
+    if not ticket:
+        flash("Ticket no encontrado.", "error")
+        return redirect(url_for("modificar_publico"))
+
+    if request.method == "POST":
+        # Obtenemos los datos del formulario
+        nuevos_datos = {
+            "nombre_completo": request.form.get("nombreCompleto", "").strip(),
+            "curp": ticket["curp"],  # CURP no se puede modificar
+            "nombre": request.form.get("nombre", "").strip(),
+            "paterno": request.form.get("paterno", "").strip(),
+            "materno": request.form.get("materno", "").strip(),
+            "telefono": request.form.get("telefono", "").strip(),
+            "celular": request.form.get("celular", "").strip(),
+            "correo": request.form.get("correo", "").strip(),
+            "id_nivel": request.form.get("nivel"),
+            "id_municipio": ticket["id_municipio"],  # Municipio no se puede modificar
+            "id_asunto": request.form.get("asunto"),
+            "status": request.form.get("status", ticket["status"])
+        }
+
+        Ticket.actualizar(id_ticket, nuevos_datos)
+        ticket = Ticket.obtener_por_id(id_ticket)
+        return render_template("ticket_editar_publico.html", ticket=ticket, exito=True)
+
+    return render_template("ticket_editar_publico.html", ticket=ticket)
+
+
+@app.route("/publico")
+def publico():
+    return render_template("publico_menu.html")
+
+
 
 def _require_admin():
     if not session.get("is_admin"):

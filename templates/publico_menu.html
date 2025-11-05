@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menú Público - Ticket de Turno</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+
+  <!-- Barra superior con botón Regresar-->
+  <div class="top-nav" style="background:none;border:none; justify-content:flex-end;">
+    <a href="{{ url_for('index') }}" class="right">Regresar</a>
+  </div>
+
+  <h1>Menú Público</h1>
+
+  <div style="max-width:1000px;margin:0 auto;background:#fff;padding:20px;border:2px solid #000;text-align:center;">
+    <p>Seleccione una opción:</p>
+
+    <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+      <!-- Botón Generar Ticket -->
+      <a href="{{ url_for('ticket') }}" style="text-decoration:none;">
+        <button type="button">Generar Ticket</button>
+      </a>
+
+      <!-- Botón Modificar Ticket -->
+      <a href="{{ url_for('modificar_publico') }}" style="text-decoration:none;">
+        <button type="button">Modificar Ticket</button>
+      </a>
+    </div>
+  </div>
+
+</body>
+</html>

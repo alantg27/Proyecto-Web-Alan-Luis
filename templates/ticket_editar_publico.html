@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar Ticket - Público</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Editar Ticket</h1>
+
+  <!-- Barra superior con botón Regresar -->
+  <div class="top-nav" style="background:none;border:none; justify-content:flex-end;">
+    <a href="{{ url_for('modificar_publico') }}" class="right">Regresar</a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div style="margin-bottom: 15px;">
+        {% for category, message in messages %}
+        <div class="{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+  <form method="POST" action="{{ url_for('editar_publico', id_ticket=ticket.id_ticket) }}">
+    <div class="form-group full">
+      <label for="nombreCompleto">Nombre completo:</label>
+      <input type="text" id="nombreCompleto" name="nombreCompleto" value="{{ ticket.nombre_completo }}">
+    </div>
+
+    <div class="form-group full">
+      <label for="curp">CURP:</label>
+      <input type="text" id="curp" name="curp" value="{{ ticket.curp }}" readonly>
+    </div>
+
+    <div class="form-group">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" value="{{ ticket.nombre }}">
+    </div>
+
+    <div class="form-group">
+      <label for="paterno">Paterno:</label>
+      <input type="text" id="paterno" name="paterno" value="{{ ticket.paterno }}">
+    </div>
+
+    <div class="form-group">
+      <label for="materno">Materno:</label>
+      <input type="text" id="materno" name="materno" value="{{ ticket.materno }}">
+    </div>
+
+    <div class="form-group">
+      <label for="telefono">Teléfono:</label>
+      <input type="text" id="telefono" name="telefono" value="{{ ticket.telefono }}">
+    </div>
+
+    <div class="form-group">
+      <label for="celular">Celular:</label>
+      <input type="text" id="celular" name="celular" value="{{ ticket.celular }}">
+    </div>
+
+    <div class="form-group full">
+      <label for="correo">Correo:</label>
+      <input type="email" id="correo" name="correo" value="{{ ticket.correo }}">
+    </div>
+
+    <div class="form-group full">
+      <label for="nivel">Nivel:</label>
+      <select id="nivel" name="nivel">
+        <option value="1" {% if ticket.id_nivel == 1 %}selected{% endif %}>Primaria</option>
+        <option value="2" {% if ticket.id_nivel == 2 %}selected{% endif %}>Secundaria</option>
+        <option value="3" {% if ticket.id_nivel == 3 %}selected{% endif %}>Bachillerato</option>
+      </select>
+    </div>
+
+    <div class="form-group full">
+      <label for="municipio">Municipio:</label>
+      <select id="municipio" name="municipio" readonly disabled>
+        <option value="1" {% if ticket.id_municipio == 1 %}selected{% endif %}>Morelos</option>
+        <option value="2" {% if ticket.id_municipio == 2 %}selected{% endif %}>Allende</option>
+        <option value="3" {% if ticket.id_municipio == 3 %}selected{% endif %}>Saltillo</option>
+      </select>
+    </div>
+
+    <div class="form-group full">
+      <label for="asunto">Asunto:</label>
+      <select id="asunto" name="asunto">
+        <option value="1" {% if ticket.id_asunto == 1 %}selected{% endif %}>Inscripción</option>
+        <option value="2" {% if ticket.id_asunto == 2 %}selected{% endif %}>Reinscripción</option>
+        <option value="3" {% if ticket.id_asunto == 3 %}selected{% endif %}>Cambio de escuela</option>
+      </select>
+    </div>
+
+    <div class="form-group full" style="text-align:center;">
+      <button type="submit">Guardar cambios</button>
+    </div>
+  </form>
+
+  <script src="{{ url_for('static', filename='js/form_validation_update.js') }}"></script>
+  <body data-exito="{{ 'true' if exito else 'false' }}"></body>
+</body>
+</html>
