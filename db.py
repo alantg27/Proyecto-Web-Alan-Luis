@@ -1,12 +1,25 @@
 import mysql.connector
 
-def get_connection():
-    return mysql.connector.connect(
-        host="localhost",
-        user="root",         
-        password="",         
-        database="ticket_turno"
-    )
+
+
+#LUIS   CAMBIO DE CONEXION A LA BASE DE DATOS A SINGLETON AQUI POR SI CREAS LLAMADOS NUEVOS
+class DatabaseConnection:
+    _instance = None
+
+    def __init__(self):
+        self.conn = mysql.connector.connect(
+            host="localhost",
+            user="root",
+            password="",
+            database="ticket_turno"
+        )
+
+    @classmethod
+    def get_instance(cls):
+        if cls._instance is None or not cls._instance.conn.is_connected():
+            cls._instance = DatabaseConnection()
+        return cls._instance.conn
+
 
 # ------------------------------
 # CLASE MODELO: Ticket
@@ -29,18 +42,34 @@ class Ticket:
 
     # ---------- CREATE ----------
     def guardar(self):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
+
+        cursor.execute("SELECT MAX(turno) FROM turno_oficina WHERE id_municipio=%s", (self.id_municipio,))
+        last_turno = cursor.fetchone()[0]
+
+        if last_turno is None:
+            last_turno = 0
+
+        nuevo_turno = last_turno + 1
+
+        cursor.execute(
+            "INSERT INTO turno_oficina (id_municipio, turno) VALUES (%s, %s)",
+            (self.id_municipio, nuevo_turno)
+        )
+
+        self.turno = nuevo_turno
+
         sql = """
         INSERT INTO ticket (
             nombre_completo, curp, nombre, paterno, materno,
-            telefono, celular, correo, id_nivel, id_municipio, id_asunto, status
-        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            telefono, celular, correo, id_nivel, id_municipio, id_asunto, status, turno
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
         valores = (
             self.nombre_completo, self.curp, self.nombre, self.paterno,
             self.materno, self.telefono, self.celular, self.correo,
-            self.id_nivel, self.id_municipio, self.id_asunto, self.status
+            self.id_nivel, self.id_municipio, self.id_asunto, self.status, self.turno
         )
         cursor.execute(sql, valores)
         conn.commit()
@@ -49,7 +78,7 @@ class Ticket:
     # ---------- READ ----------
     @staticmethod
     def obtener_todos():
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT t.*, n.nombre AS nivel, m.nombre AS municipio, a.nombre AS asunto
@@ -66,7 +95,7 @@ class Ticket:
     # ---------- UPDATE ----------
     @staticmethod
     def actualizar(id_ticket, nuevos_datos):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         sql = """
         UPDATE ticket
@@ -88,7 +117,7 @@ class Ticket:
     # ---------- DELETE ----------
     @staticmethod
     def eliminar(id_ticket):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         cursor.execute("DELETE FROM ticket WHERE id_ticket = %s", (id_ticket,))
         conn.commit()
@@ -98,7 +127,7 @@ class Ticket:
     # ---------- VERIFICAR DUPLICADO DE CURP ----------
     @staticmethod
     def existe_curp(curp):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM ticket WHERE curp = %s", (curp,))
         existe = cursor.fetchone()[0] > 0
@@ -107,7 +136,7 @@ class Ticket:
 
     @staticmethod
     def existe_curp_activo(curp):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM ticket WHERE curp = %s AND status <> 'Resuelto'", (curp,))
         existe = cursor.fetchone()[0] > 0
@@ -117,7 +146,7 @@ class Ticket:
     # ---------- OBTENER POR ID ----------
     @staticmethod
     def obtener_por_id(id_ticket):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("""
             SELECT t.*, n.nombre AS nivel, m.nombre AS municipio, a.nombre AS asunto
@@ -134,7 +163,7 @@ class Ticket:
     # ---------- BUSCAR (por CURP exacto o por nombre parcial) ----------
     @staticmethod
     def buscar(curp=None, q=None):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor(dictionary=True)
         if curp:
             cursor.execute("""
@@ -166,7 +195,7 @@ class Ticket:
 
     @staticmethod
     def contar_por_status(id_municipio=None):
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         if id_municipio:
             cursor.execute(
@@ -207,7 +236,7 @@ class Catalogo:
     @staticmethod
     def obtener_todos(tipo):
         cfg = Catalogo._cfg(tipo)
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(f"SELECT {cfg['id_col']} AS id, {cfg['nombre_col']} AS nombre FROM {cfg['tabla']} ORDER BY {cfg['nombre_col']}")
         rows = cursor.fetchall()
@@ -217,7 +246,7 @@ class Catalogo:
     @staticmethod
     def buscar(tipo, q):
         cfg = Catalogo._cfg(tipo)
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor(dictionary=True)
         like = f"%{q}%"
         cursor.execute(
@@ -231,7 +260,7 @@ class Catalogo:
     @staticmethod
     def obtener_por_id(tipo, id_):
         cfg = Catalogo._cfg(tipo)
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor(dictionary=True)
         cursor.execute(
             f"SELECT {cfg['id_col']} AS id, {cfg['nombre_col']} AS nombre FROM {cfg['tabla']} WHERE {cfg['id_col']} = %s",
@@ -244,7 +273,7 @@ class Catalogo:
     @staticmethod
     def guardar(tipo, nombre):
         cfg = Catalogo._cfg(tipo)
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         cursor.execute(f"INSERT INTO {cfg['tabla']} ({cfg['nombre_col']}) VALUES (%s)", (nombre,))
         conn.commit()
@@ -253,7 +282,7 @@ class Catalogo:
     @staticmethod
     def actualizar(tipo, id_, nombre):
         cfg = Catalogo._cfg(tipo)
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         cursor.execute(
             f"UPDATE {cfg['tabla']} SET {cfg['nombre_col']}=%s WHERE {cfg['id_col']}=%s",
@@ -265,7 +294,7 @@ class Catalogo:
     @staticmethod
     def eliminar(tipo, id_):
         cfg = Catalogo._cfg(tipo)
-        conn = get_connection()
+        conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
         try:
             cursor.execute(f"DELETE FROM {cfg['tabla']} WHERE {cfg['id_col']}=%s", (id_,))
