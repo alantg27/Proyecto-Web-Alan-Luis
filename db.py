@@ -45,18 +45,16 @@ class Ticket:
         conn = DatabaseConnection.get_instance()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT MAX(turno) FROM turno_oficina WHERE id_municipio=%s", (self.id_municipio,))
+        cursor.execute("SELECT ultimo_turno FROM control_turno WHERE id_municipio=%s", (self.id_municipio,))
         last_turno = cursor.fetchone()[0]
-
-        if last_turno is None:
-            last_turno = 0
 
         nuevo_turno = last_turno + 1
 
         cursor.execute(
-            "INSERT INTO turno_oficina (id_municipio, turno) VALUES (%s, %s)",
-            (self.id_municipio, nuevo_turno)
+            "UPDATE control_turno SET ultimo_turno=%s WHERE id_municipio=%s",
+            (nuevo_turno, self.id_municipio)
         )
+
 
         self.turno = nuevo_turno
 
