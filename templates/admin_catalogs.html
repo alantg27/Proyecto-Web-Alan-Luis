@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogos - {{ titulo }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Catálogos: {{ titulo }}</h1>
+
+  <nav class="top-nav">
+    <a href="{{ url_for('admin_panel') }}">Tickets</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}" class="{% if tipo=='asunto' %}active{% endif %}">Asuntos</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}" class="{% if tipo=='nivel' %}active{% endif %}">Niveles</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}" class="{% if tipo=='municipio' %}active{% endif %}">Municipios</a>
+    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('admin_logout') }}" class="right">Cerrar sesión</a>
+  </nav>
+
+  {% set messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div style="max-width:900px;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <form method="GET" action="{{ url_for('admin_catalog_list', tipo=tipo) }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div>
+          <label for="q">Buscar por nombre:</label>
+          <input type="text" id="q" name="q" value="{{ q or '' }}" placeholder="Nombre">
+        </div>
+        <div>
+          <button type="submit">Buscar</button>
+          <a href="{{ url_for('admin_catalog_list', tipo=tipo) }}"><button type="button">Limpiar</button></a>
+        </div>
+      </form>
+      <div style="display:flex;gap:10px;">
+        <a href="{{ url_for('admin_catalog_new', tipo=tipo) }}"><button type="button">Nuevo</button></a>
+      </div>
+    </div>
+  </div>
+
+  {% if mode == 'new' or mode == 'edit' %}
+  <form method="POST" style="max-width:600px;margin:15px auto;background:#fff;padding:20px;border:2px solid #000;display:grid;grid-template-columns:1fr;gap:15px;">
+    {% if mode == 'edit' %}
+      <div class="form-group"><strong>Editando {{ titulo|lower }} #{{ id_item }}</strong></div>
+    {% else %}
+      <div class="form-group"><strong>Nuevo {{ titulo|lower }}</strong></div>
+    {% endif %}
+
+    <div class="form-group">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" value="{{ form_data['nombre'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group" style="text-align:center;">
+      <button type="submit">{{ 'Guardar cambios' if mode=='edit' else 'Guardar' }}</button>
+      <a href="{{ url_for('admin_catalog_list', tipo=tipo) }}"><button type="button">Cancelar</button></a>
+    </div>
+  </form>
+  {% else %}
+  <div style="overflow:auto; max-width:700px; margin:15px auto; background:#fff; border:2px solid #000;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="border:1px solid #000;padding:6px;">ID</th>
+          <th style="border:1px solid #000;padding:6px;">Nombre</th>
+          <th style="border:1px solid #000;padding:6px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td style="border:1px solid #000;padding:6px;">{{ it.id }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ it.nombre }}</td>
+          <td class="table-actions" style="border:1px solid #000;padding:6px;">
+            <a href="{{ url_for('admin_catalog_edit', tipo=tipo, id_item=it.id) }}"><button type="button">Editar</button></a>
+            <form method="POST" action="{{ url_for('admin_catalog_delete', tipo=tipo, id_item=it.id) }}" onsubmit="return confirm('¿Eliminar {{ titulo|lower }} {{ it.nombre }}?');">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="3" style="text-align:center; padding:10px;">Sin resultados.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</body>
+</html>

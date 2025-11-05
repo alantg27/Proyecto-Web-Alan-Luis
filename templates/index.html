@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso - Ticket de Turno</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Ticket de Turno</h1>
+
+  <div style="max-width:1000px;margin:0 auto;background:#fff;padding:20px;border:2px solid #000; text-align:center;">
+    <p>Elija el tipo de acceso:</p>
+
+    <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
+      <a href="/admin" class="button-link" style="text-decoration:none;">
+        <button type="button">Administrador</button>
+      </a>
+
+      <a href="{{ url_for('ticket') }}" class="button-link" style="text-decoration:none;">
+        <button type="button">Acceso público</button>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

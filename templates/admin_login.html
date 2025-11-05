@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Acceso Administrador</h1>
+
+  {% set messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" style="max-width:600px;margin:0 auto;">
+    <div class="form-group full">
+      <label for="usuario">Usuario:</label>
+      <input type="text" id="usuario" name="usuario" value="">
+    </div>
+
+    <div class="form-group full">
+      <label for="contrasena">Contraseña:</label>
+      <input type="password" id="contrasena" name="contrasena" value="">
+    </div>
+
+    <div class="form-group full">
+      <label for="captcha">Captcha:</label>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <img id="captcha_img" src="{{ url_for('captcha_image') }}" alt="captcha" style="border:1px solid #000;">
+        <a href="#" id="refresh_captcha">[Cambiar]</a>
+      </div>
+      <input type="text" id="captcha" name="captcha" value="">
+      <small>Escribe los caracteres que ves en la imagen.</small>
+    </div>
+
+    <div class="form-group full" style="text-align:center;">
+      <button type="submit">Ingresar</button>
+    </div>
+  </form>
+
+  <script>
+  document.getElementById('refresh_captcha').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('captcha_img').src='{{ url_for("captcha_image") }}?t=' + Date.now();
+  });
+  </script>
+</body>
+</html>

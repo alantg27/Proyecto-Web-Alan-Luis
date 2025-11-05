@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Tickets</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Dashboard</h1>
+
+  <nav class="top-nav">
+    <a href="{{ url_for('admin_panel') }}">Tickets</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}">Asuntos</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}">Niveles</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}">Municipios</a>
+    <a href="{{ url_for('admin_dashboard') }}" class="active">Dashboard</a>
+    <a href="{{ url_for('admin_logout') }}" class="right">Cerrar sesión</a>
+  </nav>
+
+  <div style="max-width:25%;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
+    <form method="GET" action="{{ url_for('admin_dashboard') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <div>
+        <label for="municipio">Municipio:</label>
+        <select id="municipio" name="municipio">
+          <option value="" {% if not selected %}selected{% endif %}>Todos</option>
+          {% for m in municipios %}
+            <option value="{{ m.id }}" {% if selected and selected == (m.id|string) %}selected{% endif %}>{{ m.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <button type="submit">Aplicar</button>
+      </div>
+    </form>
+
+    <div style="margin-top:15px; display:grid; grid-template-columns:1fr; gap:20px;">
+      <div>
+        <canvas id="chartStatus" height="120"></canvas>
+      </div>
+      <div id="totales" style="text-align:center; font-weight:bold;"></div>
+    </div>
+  </div>
+
+  <script>
+    const selectM = document.getElementById('municipio');
+    const ctx = document.getElementById('chartStatus').getContext('2d');
+    let chart;
+
+    async function loadData() {
+      const params = new URLSearchParams();
+      if (selectM.value) params.set('municipio', selectM.value);
+      const res = await fetch(`{{ url_for('admin_dashboard_data') }}?` + params.toString(), {credentials:'same-origin'});
+      const data = await res.json();
+      renderChart(data);
+    }
+
+    function renderChart(data) {
+      const labels = ['Pendiente', 'Resuelto'];
+      const values = [data.Pendiente || 0, data.Resuelto || 0];
+      const total = data.Total || (values[0] + values[1]);
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Tickets',
+            data: values,
+            backgroundColor: ['#f5a623','#4caf50'],
+            borderColor: '#000',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          plugins: { legend: { position: 'bottom' } }
+        }
+      });
+
+      const pct = (v) => total ? Math.round((v/total)*100) : 0;
+      document.getElementById('totales').textContent =
+        `Total: ${total} | Pendientes: ${values[0]} (${pct(values[0])}%) | Resueltos: ${values[1]} (${pct(values[1])}%)`;
+    }
+
+    loadData();
+  </script>
+</body>
+</html>

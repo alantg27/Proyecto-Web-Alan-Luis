@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Admin - Tickets</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Panel de Administración</h1>
+
+  <nav class="top-nav">
+    <a href="{{ url_for('admin_panel') }}" class="{% if request.endpoint in ['admin_panel','admin_ticket_new','admin_ticket_edit'] %}active{% endif %}">Tickets</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}">Asuntos</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}">Niveles</a>
+    <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}">Municipios</a>
+    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('admin_logout') }}" class="right">Cerrar sesión</a>
+  </nav>
+
+  {% set messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div style="max-width:1100px;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+      <form method="GET" action="{{ url_for('admin_panel') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+        <div>
+          <label for="curp">Buscar por CURP:</label>
+          <input type="text" id="curp" name="curp" value="{{ request.args.get('curp','') }}" placeholder="CURP exacta" />
+        </div>
+        <div>
+          <label for="q">o por Nombre:</label>
+          <input type="text" id="q" name="q" value="{{ request.args.get('q','') }}" placeholder="Nombre, paterno o materno" />
+        </div>
+        <div>
+          <button type="submit">Buscar</button>
+          <a href="{{ url_for('admin_panel') }}"><button type="button">Limpiar</button></a>
+        </div>
+      </form>
+
+      <div style="display:flex;gap:10px;">
+        <a href="{{ url_for('admin_ticket_new') }}"><button type="button">Nuevo Ticket</button></a>
+      </div>
+    </div>
+  </div>
+
+  {% if mode == 'new' or mode == 'edit' %}
+  <form method="POST" style="max-width:1000px;margin:15px auto;background:#fff;padding:20px;border:2px solid #000;display:grid;grid-template-columns:repeat(3,1fr);gap:15px;">
+    {% if mode == 'edit' %}
+      <div class="form-group full"><strong>Editando ticket #{{ id_ticket }}</strong></div>
+    {% else %}
+      <div class="form-group full"><strong>Registrar nuevo ticket</strong></div>
+    {% endif %}
+
+    <div class="form-group full">
+      <label for="nombreCompleto">Nombre completo:</label>
+      <input type="text" id="nombreCompleto" name="nombreCompleto" value="{{ form_data['nombreCompleto'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="curp">CURP:</label>
+      <input type="text" id="curp" name="curp" value="{{ form_data['curp'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" value="{{ form_data['nombre'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="paterno">Paterno:</label>
+      <input type="text" id="paterno" name="paterno" value="{{ form_data['paterno'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="materno">Materno:</label>
+      <input type="text" id="materno" name="materno" value="{{ form_data['materno'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="telefono">Teléfono:</label>
+      <input type="text" id="telefono" name="telefono" value="{{ form_data['telefono'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="celular">Celular:</label>
+      <input type="text" id="celular" name="celular" value="{{ form_data['celular'] if form_data else '' }}">
+    </div>
+    <div class="form-group full">
+      <label for="correo">Correo:</label>
+      <input type="email" id="correo" name="correo" value="{{ form_data['correo'] if form_data else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="nivel">Nivel:</label>
+      <select id="nivel" name="nivel">
+        <option value="">Seleccione...</option>
+        <option value="1" {% if form_data and form_data['nivel']=='1' %}selected{% endif %}>Primaria</option>
+        <option value="2" {% if form_data and form_data['nivel']=='2' %}selected{% endif %}>Secundaria</option>
+        <option value="3" {% if form_data and form_data['nivel']=='3' %}selected{% endif %}>Bachillerato</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="municipio">Municipio:</label>
+      <select id="municipio" name="municipio">
+        <option value="">Seleccione...</option>
+        <option value="1" {% if form_data and form_data['municipio']=='1' %}selected{% endif %}>Morelos</option>
+        <option value="2" {% if form_data and form_data['municipio']=='2' %}selected{% endif %}>Allende</option>
+        <option value="3" {% if form_data and form_data['municipio']=='3' %}selected{% endif %}>Saltillo</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="asunto">Asunto:</label>
+      <select id="asunto" name="asunto">
+        <option value="">Seleccione...</option>
+        <option value="1" {% if form_data and form_data['asunto']=='1' %}selected{% endif %}>Inscripción</option>
+        <option value="2" {% if form_data and form_data['asunto']=='2' %}selected{% endif %}>Reinscripción</option>
+        <option value="3" {% if form_data and form_data['asunto']=='3' %}selected{% endif %}>Cambio de escuela</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="status">Estatus:</label>
+      <select id="status" name="status">
+        <option value="Pendiente" {% if form_data and form_data.get('status','Pendiente')=='Pendiente' %}selected{% endif %}>Pendiente</option>
+        <option value="Resuelto" {% if form_data and form_data.get('status')=='Resuelto' %}selected{% endif %}>Resuelto</option>
+      </select>
+    </div>
+
+    <div class="form-group full" style="text-align:center;">
+      {% if mode == 'edit' %}
+        <button type="submit">Guardar cambios</button>
+        <a href="{{ url_for('admin_panel') }}"><button type="button">Cancelar</button></a>
+      {% else %}
+        <button type="submit">Registrar</button>
+        <a href="{{ url_for('admin_panel') }}"><button type="button">Cancelar</button></a>
+      {% endif %}
+    </div>
+  </form>
+  {% endif %}
+
+  {% if mode == 'list' %}
+  <div style="overflow:auto; max-width:1000px; margin:15px auto; background:#fff; border:2px solid #000;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="border:1px solid #000;padding:6px;">ID</th>
+          <th style="border:1px solid #000;padding:6px;">Nombre completo</th>
+          <th style="border:1px solid #000;padding:6px;">CURP</th>
+          <th style="border:1px solid #000;padding:6px;">Nombre</th>
+          <th style="border:1px solid #000;padding:6px;">Paterno</th>
+          <th style="border:1px solid #000;padding:6px;">Materno</th>
+          <th style="border:1px solid #000;padding:6px;">Teléfono</th>
+          <th style="border:1px solid #000;padding:6px;">Celular</th>
+          <th style="border:1px solid #000;padding:6px;">Correo</th>
+          <th style="border:1px solid #000;padding:6px;">Nivel</th>
+          <th style="border:1px solid #000;padding:6px;">Municipio</th>
+          <th style="border:1px solid #000;padding:6px;">Asunto</th>
+          <th style="border:1px solid #000;padding:6px;">Fecha</th>
+          <th style="border:1px solid #000;padding:6px;">Estatus</th>
+          <th style="border:1px solid #000;padding:6px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td style="border:1px solid #000;padding:6px;">{{ t.id_ticket }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.nombre_completo }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.curp }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.nombre }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.paterno }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.materno }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.telefono }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.celular }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.correo }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.nivel }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.municipio }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.asunto }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.fecha_generacion }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ t.status }}</td>
+          <td class="table-actions" style="border:1px solid #000;padding:6px;">
+            <a href="{{ url_for('admin_ticket_edit', id_ticket=t.id_ticket) }}"><button type="button">Editar</button></a>
+            <form method="POST" action="{{ url_for('admin_ticket_delete', id_ticket=t.id_ticket) }}" onsubmit="return confirm('¿Eliminar ticket #{{ t.id_ticket }}?');">
+              <button type="submit">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="14" style="text-align:center; padding:10px;">Sin resultados.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</body>
+</html>
