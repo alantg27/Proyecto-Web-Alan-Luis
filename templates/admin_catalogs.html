@@ -15,7 +15,9 @@
     <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}" class="{% if tipo=='nivel' %}active{% endif %}">Niveles</a>
     <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}" class="{% if tipo=='municipio' %}active{% endif %}">Municipios</a>
     <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('admin_logout') }}" class="right">Cerrar sesión</a>
+    <form method="POST" action="{{ url_for('admin_logout') }}" class="right" style="margin-left:auto;">
+      <button type="submit">Cerrar sesión</button>
+    </form>
   </nav>
 
   {% set messages = get_flashed_messages(with_categories=true) %}

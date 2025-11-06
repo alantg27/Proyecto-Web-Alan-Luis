@@ -112,6 +112,7 @@ button:hover {
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 .top-nav a {
   text-decoration: none;
@@ -148,10 +149,123 @@ table form {
   margin-left: 6px;
 }
 
-/* Estilos para campos de solo lectura y deshabilitados */
 input[readonly],
 select[disabled] {
     background-color: #e0e0e0;
     color: #555;      
     cursor: not-allowed;
 }
+
+@media (max-width: 992px) {
+  form {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .form-group.full {
+    grid-column: span 2;
+  }
+}
+
+.top-nav {
+  max-width: 1100px;
+  margin: 0 auto 12px;
+  background: #fff;
+  border: 2px solid #000;
+  padding: 8px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+@media (max-width: 576px) {
+  .top-nav a {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 576px) {
+  button {
+    width: 100%;
+  }
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+@media (max-width: 768px) {
+  table {
+    font-size: 13px;
+  }
+  table th, table td {
+    padding: 8px 6px !important;
+  }
+}
+@media (max-width: 576px) {
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+
+.card {
+  max-width: 1100px;
+  margin: 0 auto;
+  background: #fff;
+  border: 2px solid #000;
+  padding: 15px;
+}
+.card.narrow {
+  max-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-panel {
+    max-width: 100% !important;
+  }
+}
+
+.chart-container {
+  position: relative;
+  width: 50%;
+  max-width: 40%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  margin: 0 auto;
+  overflow: hidden;
+}
+.chart-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+@media (max-width: 576px) {
+  .chart-container {
+    aspect-ratio: 1 / 1.1;
+  }
+}
+
+.top-nav form {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  grid-template-columns: none;
+}
+
+.top-nav form button {
+  padding: 8px 12px;
+  border: 1px solid #000;
+  background: #eee;
+  color: #000;
+  font-weight: bold;
+  cursor: pointer;
+}
+.top-nav form button:hover { background: #ddd; }
+.top-nav form button:focus { outline: none; }
+
+.top-nav .right { margin-left: auto; }

@@ -5,12 +5,17 @@ import random
 import io
 import string
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import mm
+from reportlab.lib.utils import ImageReader
+import qrcode
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta_para_flask"
 
 def generar_captcha_text(length=5):
-    chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # evitar O,0,I,1 confusos
+    chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
     return "".join(random.choice(chars) for _ in range(length))
 
 @app.route("/captcha_image")
@@ -107,6 +112,79 @@ def admin():
         return render_template("admin_login.html")
 
 
+@app.route("/comprobante/<int:id_ticket>", methods=["GET"])
+def ticket_comprobante(id_ticket):
+    row = Ticket.obtener_por_id(id_ticket)
+    if not row:
+        flash("Ticket no encontrado.", "error")
+        return redirect(url_for("index"))
+    pdf_io = generar_pdf_comprobante_row(row)
+    filename = f"comprobante_{row.get('curp','CURP')}_{row.get('turno','NA')}.pdf"
+    return send_file(pdf_io, mimetype="application/pdf", as_attachment=True, download_name=filename)
+
+def generar_pdf_comprobante_row(row):
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf, pagesize=A4)
+    width, height = A4  # 595x842 aprox
+
+    # Marco
+    margen = 18 * mm
+    c.setLineWidth(2)
+    c.rect(margen, margen, width - 2*margen, height - 2*margen)
+
+    # Título
+    c.setFont("Helvetica-Bold", 18)
+    c.drawCentredString(width/2, height - margen - 10*mm, "Comprobante de Solicitud")
+
+    # Datos
+    c.setFont("Helvetica", 11)
+    y = height - margen - 25*mm
+    line_h = 7*mm
+
+    def draw_kv(k, v):
+        nonlocal y
+        c.setFont("Helvetica-Bold", 11); c.drawString(margen + 10*mm, y, f"{k}:")
+        c.setFont("Helvetica", 11);      c.drawString(margen + 55*mm, y, str(v) if v is not None else "")
+        y -= line_h
+
+    draw_kv("ID Ticket", row.get("id_ticket"))
+    draw_kv("Turno", row.get("turno", "N/A"))
+    draw_kv("Nombre completo", row.get("nombre_completo"))
+    draw_kv("CURP", row.get("curp"))
+    draw_kv("Nivel", row.get("nivel", ""))
+    draw_kv("Municipio", row.get("municipio", ""))
+    draw_kv("Asunto", row.get("asunto", ""))
+    draw_kv("Estatus", row.get("status", "Pendiente"))
+    draw_kv("Fecha de registro", row.get("fecha_generacion"))
+
+    # Nota
+    y -= 4*mm
+    c.setFont("Helvetica-Oblique", 9)
+    c.drawString(margen + 10*mm, y, "Conserva este comprobante. El código QR contiene la CURP del solicitante.")
+    y -= 2*mm
+
+    # QR con la CURP
+    qr_data = row.get("curp", "")
+    # construir QR y convertir a PNG en memoria
+    qr = qrcode.QRCode(version=None, error_correction=qrcode.constants.ERROR_CORRECT_M, box_size=8, border=2)
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white").convert("RGB")
+    qr_buf = io.BytesIO()
+    qr_img.save(qr_buf, format="PNG")
+    qr_buf.seek(0)
+    qr_reader = ImageReader(qr_buf)
+    qr_size = 40 * mm
+    # Posicionar QR a la derecha
+    c.drawImage(qr_reader, width - margen - qr_size - 10, height - margen - qr_size - 10, qr_size, qr_size, preserveAspectRatio=True, mask='auto')
+    c.setFont("Helvetica", 8)
+    c.drawRightString(width - margen - 10, height - margen - qr_size - 14, "QR: CURP")
+
+    c.showPage()
+    c.save()
+    buf.seek(0)
+    return buf
+
 @app.route("/ticket", methods=["GET", "POST"])
 def ticket():
     if request.method == "POST":
@@ -174,7 +252,7 @@ def ticket():
         t.guardar()
 
         flash("Formulario enviado y ticket registrado correctamente", "success")
-        return redirect(url_for("ticket"))
+        return redirect(url_for("ticket_comprobante", id_ticket=t.id_ticket))
 
     return render_template("ticket.html")
 
@@ -239,11 +317,17 @@ def _require_admin():
         return False
     return True
 
-@app.route("/admin/logout")
+@app.route("/admin/logout", methods=["POST"])
 def admin_logout():
-    session.pop("is_admin", None)
-    #flash("Sesión de administrador cerrada.", "success")
+    session.clear()
     return redirect(url_for("index"))
+
+@app.after_request
+def add_no_cache_headers(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
 
 # PANEL: listar y buscar
 @app.route("/admin/panel", methods=["GET"])

@@ -16,10 +16,12 @@
     <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}">Niveles</a>
     <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}">Municipios</a>
     <a href="{{ url_for('admin_dashboard') }}" class="active">Dashboard</a>
-    <a href="{{ url_for('admin_logout') }}" class="right">Cerrar sesión</a>
+    <form method="POST" action="{{ url_for('admin_logout') }}" class="right" style="margin-left:auto;">
+      <button type="submit">Cerrar sesión</button>
+    </form>
   </nav>
 
-  <div style="max-width:25%;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
+  <div class="card dashboard-panel">
     <form method="GET" action="{{ url_for('admin_dashboard') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
       <div>
         <label for="municipio">Municipio:</label>
@@ -36,8 +38,8 @@
     </form>
 
     <div style="margin-top:15px; display:grid; grid-template-columns:1fr; gap:20px;">
-      <div>
-        <canvas id="chartStatus" height="120"></canvas>
+      <div class="chart-container">
+        <canvas id="chartStatus"></canvas>
       </div>
       <div id="totales" style="text-align:center; font-weight:bold;"></div>
     </div>
@@ -75,13 +77,26 @@
           }]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           plugins: { legend: { position: 'bottom' } }
         }
       });
 
+      requestAnimationFrame(() => chart && chart.resize());
+
       const pct = (v) => total ? Math.round((v/total)*100) : 0;
       document.getElementById('totales').textContent =
         `Total: ${total} | Pendientes: ${values[0]} (${pct(values[0])}%) | Resueltos: ${values[1]} (${pct(values[1])}%)`;
+    }
+
+    const container = document.querySelector('.chart-container');
+    if ('ResizeObserver' in window && container) {
+      const ro = new ResizeObserver(() => { if (chart) chart.resize(); });
+      ro.observe(container);
+    } else {
+      window.addEventListener('resize', () => { if (chart) chart.resize(); });
+      window.addEventListener('orientationchange', () => { if (chart) chart.resize(); });
     }
 
     loadData();

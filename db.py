@@ -47,14 +47,11 @@ class Ticket:
 
         cursor.execute("SELECT ultimo_turno FROM control_turno WHERE id_municipio=%s", (self.id_municipio,))
         last_turno = cursor.fetchone()[0]
-
         nuevo_turno = last_turno + 1
-
         cursor.execute(
             "UPDATE control_turno SET ultimo_turno=%s WHERE id_municipio=%s",
             (nuevo_turno, self.id_municipio)
         )
-
 
         self.turno = nuevo_turno
 
@@ -70,6 +67,7 @@ class Ticket:
             self.id_nivel, self.id_municipio, self.id_asunto, self.status, self.turno
         )
         cursor.execute(sql, valores)
+        self.id_ticket = cursor.lastrowid  # <--- id insertado
         conn.commit()
         conn.close()
 
