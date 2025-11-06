@@ -67,19 +67,19 @@
 
     <div class="form-group full">
       <label for="nivel">Nivel:</label>
-      <select id="nivel" name="nivel" data-selected="{{ form_data['nivel'] if form_data else '' }}">
+      <select id="nivel" name="nivel" data-selected="{{ ticket.id_nivel }}">
       </select>
     </div>
 
     <div class="form-group full">
       <label for="municipio">Municipio:</label>
-      <select id="municipio" name="municipio" data-selected="{{ form_data['municipio'] if form_data else '' }}">
+      <select id="municipio" name="municipio" data-selected="{{ ticket.id_municipio }}" readonly disabled>
       </select>
     </div>
 
     <div class="form-group full">
       <label for="asunto">Asunto:</label>
-      <select id="asunto" name="asunto" data-selected="{{ form_data['asunto'] if form_data else '' }}">
+      <select id="asunto" name="asunto" data-selected="{{ ticket.id_asunto }}">
       </select>
     </div>
 

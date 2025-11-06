@@ -1,10 +1,14 @@
 import mysql.connector
+from mysql.connector import pooling
 
 class DatabaseConnection:
     _instance = None
 
     def __init__(self):
-        self.conn = mysql.connector.connect(
+        # Creamos un pool de conexiones
+        self.pool = mysql.connector.pooling.MySQLConnectionPool(
+            pool_name="mypool",
+            pool_size=32,
             host="localhost",
             user="root",
             password="",
@@ -13,6 +17,8 @@ class DatabaseConnection:
 
     @classmethod
     def get_instance(cls):
-        if cls._instance is None or not cls._instance.conn.is_connected():
+        if cls._instance is None:
             cls._instance = DatabaseConnection()
-        return cls._instance.conn
+        # Devuelve directamente una conexión del pool
+        return cls._instance.pool.get_connection()
+
