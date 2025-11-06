@@ -32,7 +32,7 @@
     <div class="form-group full">
       <label for="captcha">Captcha:</label>
       <div style="display:flex;align-items:center;gap:10px;">
-        <img id="captcha_img" src="{{ url_for('captcha_image') }}" alt="captcha" style="border:1px solid #000;">
+        <img id="captcha_img" src="{{ url_for('main_bp.captcha_image') }}" alt="captcha" style="border:1px solid #000;">
         <a href="#" id="refresh_captcha">[Cambiar]</a>
       </div>
       <input type="text" id="captcha" name="captcha" value="">
@@ -47,7 +47,7 @@
   <script>
   document.getElementById('refresh_captcha').addEventListener('click', function(e) {
     e.preventDefault();
-    document.getElementById('captcha_img').src='{{ url_for("captcha_image") }}?t=' + Date.now();
+    document.getElementById('captcha_img').src='{{ url_for("main_bp.captcha_image") }}?t=' + Date.now();
   });
   </script>
 </body>

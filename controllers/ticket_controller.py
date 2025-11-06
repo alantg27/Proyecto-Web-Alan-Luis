@@ -50,7 +50,7 @@ def ticket():
         if errores:
             for e in errores:
                 flash(e, "error")
-            return redirect(url_for("ticket"))
+            return redirect(url_for("ticket_bp.ticket"))
 
 
         if Ticket.existe_curp_activo(curp):
@@ -80,7 +80,7 @@ def ticket():
         t.guardar()
 
         flash("Formulario enviado y ticket registrado correctamente", "success")
-        return redirect(url_for("ticket_comprobante", id_ticket=t.id_ticket))
+        return redirect(url_for("ticket_bp.ticket_comprobante", id_ticket=t.id_ticket))
 
     return render_template("ticket.html")
 
@@ -95,7 +95,7 @@ def modificar_publico():
         # Buscamos el ticket por CURP y turno
         ticket = Ticket.obtener_por_curp_turno(curp, turno)
         if ticket:
-            return redirect(url_for("editar_publico", id_ticket=ticket["id_ticket"]))
+            return redirect(url_for("ticket_bp.editar_publico", id_ticket=ticket["id_ticket"]))
         else:
             return render_template("modificar_publico.html", form_data=request.form)
 
@@ -106,7 +106,7 @@ def modificar_publico():
 def editar_publico(id_ticket):
     ticket = Ticket.obtener_por_id(id_ticket)
     if not ticket:
-        return redirect(url_for("modificar_publico"))
+        return redirect(url_for("ticket_bp.modificar_publico"))
 
     if request.method == "POST":
         # Obtenemos los datos del formulario
@@ -210,7 +210,7 @@ def generar_pdf_comprobante_row(row):
 @ticket_bp.route("/admin/panel", methods=["GET"])
 def admin_panel():
     if not _require_admin():
-        return redirect(url_for("admin"))
+        return redirect(url_for("main_bp.admin"))
     curp = request.args.get("curp", "").strip().upper()
     q = request.args.get("q", "").strip()
     if curp:
@@ -226,7 +226,7 @@ def admin_panel():
 @ticket_bp.route("/admin/ticket/new", methods=["GET", "POST"])
 def admin_ticket_new():
     if not _require_admin():
-        return redirect(url_for("admin"))
+        return redirect(url_for("main_bp.admin"))
     if request.method == "GET":
         return render_template("admin_panel.html", mode="new", tickets=[], form_data={})
 
@@ -276,18 +276,18 @@ def admin_ticket_new():
     )
     t.guardar()
     flash("Ticket creado correctamente.", "success")
-    return redirect(url_for("admin_panel"))
+    return redirect(url_for("ticket_bp.admin_panel"))
 
 # EDITAR
 @ticket_bp.route("/admin/ticket/<int:id_ticket>/edit", methods=["GET", "POST"])
 def admin_ticket_edit(id_ticket):
     if not _require_admin():
-        return redirect(url_for("admin"))
+        return redirect(url_for("main_bp.admin"))
     if request.method == "GET":
         row = Ticket.obtener_por_id(id_ticket)
         if not row:
             flash("Ticket no encontrado.", "error")
-            return redirect(url_for("admin_panel"))
+            return redirect(url_for("ticket_bp.admin_panel"))
         # Adaptamos nombres para el formulario
         form_data = {
             "nombreCompleto": row.get("nombre_completo", ""),
@@ -339,7 +339,7 @@ def admin_ticket_edit(id_ticket):
     row_actual = Ticket.obtener_por_id(id_ticket)
     if not row_actual:
         flash("Ticket no encontrado.", "error")
-        return redirect(url_for("admin_panel"))
+        return redirect(url_for("ticket_bp.admin_panel"))
     if curp != (row_actual.get("curp") or "") and Ticket.existe_curp_activo(curp):
         errores.append("El CURP ingresado ya se encuentra registrado en otro ticket pendiente.")
 
@@ -364,13 +364,12 @@ def admin_ticket_edit(id_ticket):
     }
     Ticket.actualizar(id_ticket, nuevos)
     flash("Ticket actualizado correctamente.", "success")
-    return redirect(url_for("admin_panel"))
+    return redirect(url_for("ticket_bp.admin_panel"))
 
-# ELIMINAR
 @ticket_bp.route("/admin/ticket/<int:id_ticket>/delete", methods=["POST"])
 def admin_ticket_delete(id_ticket):
     if not _require_admin():
-        return redirect(url_for("admin"))
+        return redirect(url_for("main_bp.admin"))
     Ticket.eliminar(id_ticket)
     flash("Ticket eliminado.", "success")
-    return redirect(url_for("admin_panel"))
+    return redirect(url_for("ticket_bp.admin_panel"))

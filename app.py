@@ -17,8 +17,10 @@ def create_app():
     app.register_blueprint(dashboard_bp)
 
     # === INICIALIZAR DB UNA VEZ ===
-    from models.db import DB
-    DB.get_instance()  # esto asegura que cree la conexión singleton
+    #from models.db import DB
+    #DB.get_instance()  # esto asegura que cree la conexión singleton
+    from models.db import DatabaseConnection
+    DatabaseConnection.get_instance() 
 
     return app
 

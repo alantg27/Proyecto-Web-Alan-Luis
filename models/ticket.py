@@ -129,7 +129,7 @@ class Ticket:
                 LEFT JOIN municipio m ON t.id_municipio = m.id_municipio
                 LEFT JOIN asunto a ON t.id_asunto = a.id_asunto
                 WHERE t.curp = %s
-                ORDER BY fecha_generacion DESC
+                ORDER BY t.fecha_generacion DESC
             """, (curp,))
             return cursor.fetchall()
 
@@ -139,10 +139,10 @@ class Ticket:
                 SELECT t.*, n.nombre AS nivel, m.nombre AS municipio, a.nombre AS asunto
                 FROM ticket t
                 LEFT JOIN nivel n ON t.id_nivel = n.id_nivel
-                LEFT JOIN municipio m ON t.id_municipio = n.id_municipio
+                LEFT JOIN municipio m ON t.id_municipio = m.id_municipio
                 LEFT JOIN asunto a ON t.id_asunto = a.id_asunto
                 WHERE t.nombre_completo LIKE %s OR t.nombre LIKE %s OR t.paterno LIKE %s OR t.materno LIKE %s
-                ORDER BY fecha_generacion DESC
+                ORDER BY t.fecha_generacion DESC
             """, (like, like, like, like))
             return cursor.fetchall()
 

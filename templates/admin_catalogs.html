@@ -10,12 +10,12 @@
   <h1>Catálogos: {{ titulo }}</h1>
 
   <nav class="top-nav">
-    <a href="{{ url_for('admin_panel') }}">Tickets</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}" class="{% if tipo=='asunto' %}active{% endif %}">Asuntos</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}" class="{% if tipo=='nivel' %}active{% endif %}">Niveles</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}" class="{% if tipo=='municipio' %}active{% endif %}">Municipios</a>
-    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <form method="POST" action="{{ url_for('admin_logout') }}" class="right" style="margin-left:auto;">
+    <a href="{{ url_for('ticket_bp.admin_panel') }}">Tickets</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='asunto') }}" class="{% if tipo=='asunto' %}active{% endif %}">Asuntos</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='nivel') }}" class="{% if tipo=='nivel' %}active{% endif %}">Niveles</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='municipio') }}" class="{% if tipo=='municipio' %}active{% endif %}">Municipios</a>
+    <a href="{{ url_for('dashboard_bp.admin_dashboard') }}">Dashboard</a>
+    <form method="POST" action="{{ url_for('main_bp.admin_logout') }}" class="right" style="margin-left:auto;">
       <button type="submit">Cerrar sesión</button>
     </form>
   </nav>
@@ -31,18 +31,18 @@
 
   <div style="max-width:900px;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <form method="GET" action="{{ url_for('admin_catalog_list', tipo=tipo) }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <form method="GET" action="{{ url_for('catalogos_bp.admin_catalog_list', tipo=tipo) }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
         <div>
           <label for="q">Buscar por nombre:</label>
           <input type="text" id="q" name="q" value="{{ q or '' }}" placeholder="Nombre">
         </div>
         <div>
           <button type="submit">Buscar</button>
-          <a href="{{ url_for('admin_catalog_list', tipo=tipo) }}"><button type="button">Limpiar</button></a>
+          <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo=tipo) }}"><button type="button">Limpiar</button></a>
         </div>
       </form>
       <div style="display:flex;gap:10px;">
-        <a href="{{ url_for('admin_catalog_new', tipo=tipo) }}"><button type="button">Nuevo</button></a>
+        <a href="{{ url_for('catalogos_bp.admin_catalog_new', tipo=tipo) }}"><button type="button">Nuevo</button></a>
       </div>
     </div>
   </div>
@@ -62,7 +62,7 @@
 
     <div class="form-group" style="text-align:center;">
       <button type="submit">{{ 'Guardar cambios' if mode=='edit' else 'Guardar' }}</button>
-      <a href="{{ url_for('admin_catalog_list', tipo=tipo) }}"><button type="button">Cancelar</button></a>
+      <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo=tipo) }}"><button type="button">Cancelar</button></a>
     </div>
   </form>
   {% else %}
@@ -81,8 +81,8 @@
           <td style="border:1px solid #000;padding:6px;">{{ it.id }}</td>
           <td style="border:1px solid #000;padding:6px;">{{ it.nombre }}</td>
           <td class="table-actions" style="border:1px solid #000;padding:6px;">
-            <a href="{{ url_for('admin_catalog_edit', tipo=tipo, id_item=it.id) }}"><button type="button">Editar</button></a>
-            <form method="POST" action="{{ url_for('admin_catalog_delete', tipo=tipo, id_item=it.id) }}" onsubmit="return confirm('¿Eliminar {{ titulo|lower }} {{ it.nombre }}?');">
+            <a href="{{ url_for('catalogos_bp.admin_catalog_edit', tipo=tipo, id_item=it.id) }}"><button type="button">Editar</button></a>
+            <form method="POST" action="{{ url_for('catalogos_bp.admin_catalog_delete', tipo=tipo, id_item=it.id) }}" onsubmit="return confirm('¿Eliminar {{ titulo|lower }} {{ it.nombre }}?');">
               <button type="submit">Eliminar</button>
             </form>
           </td>

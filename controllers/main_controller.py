@@ -104,11 +104,9 @@ def admin():
     ADMIN_PASS = "admin123"
 
     if usuario == ADMIN_USER and contrasena == ADMIN_PASS:
-        #flash("Acceso de administrador concedido.", "success")
-        # limpiar captcha de sesión por seguridad
         session.pop("captcha_text", None)
         session["is_admin"] = True
-        return redirect(url_for("admin_panel"))
+        return redirect(url_for("ticket_bp.admin_panel"))
     else:
         flash("Usuario o contraseña inválidos.", "error")
         session["captcha_text"] = generar_captcha_text()
@@ -132,7 +130,7 @@ def _require_admin():
 @main_bp.route("/admin/logout", methods=["POST"])
 def admin_logout():
     session.clear()
-    return redirect(url_for("index"))
+    return redirect(url_for("main_bp.index"))
 
 
 @main_bp.after_request

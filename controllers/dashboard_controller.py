@@ -11,7 +11,7 @@ dashboard_bp = Blueprint('dashboard_bp', __name__)
 @dashboard_bp.route("/admin/dashboard", methods=["GET"])
 def admin_dashboard():
     if not _require_admin():
-        return redirect(url_for("admin"))
+        return redirect(url_for("main_bp.admin"))
     municipios = Catalogo.obtener_todos("municipio")
     selected = request.args.get("municipio", "").strip()
     return render_template("admin_dashboard.html", municipios=municipios, selected=selected)

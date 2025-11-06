@@ -10,12 +10,12 @@
   <h1>Panel de Administración</h1>
 
   <nav class="top-nav">
-    <a href="{{ url_for('ticket_bp.admin_panel') }}" class="{% if request.endpoint in ['admin_panel','admin_ticket_new','admin_ticket_edit'] %}active{% endif %}">Tickets</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}">Asuntos</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}">Niveles</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}">Municipios</a>
-    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
-    <form method="POST" action="{{ url_for('admin_logout') }}" class="right" style="margin-left:auto;">
+    <a href="{{ url_for('ticket_bp.admin_panel') }}" class="{% if request.endpoint in ['ticket_bp.admin_panel','ticket_bp.admin_ticket_new','ticket_bp.admin_ticket_edit'] %}active{% endif %}">Tickets</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='asunto') }}">Asuntos</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='nivel') }}">Niveles</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='municipio') }}">Municipios</a>
+    <a href="{{ url_for('dashboard_bp.admin_dashboard') }}">Dashboard</a>
+    <form method="POST" action="{{ url_for('main_bp.admin_logout') }}" class="right" style="margin-left:auto;">
       <button type="submit">Cerrar sesión</button>
     </form>
   </nav>
@@ -31,7 +31,7 @@
 
   <div style="max-width:1100px;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
-      <form method="GET" action="{{ url_for('admin_panel') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+      <form method="GET" action="{{ url_for('ticket_bp.admin_panel') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
         <div>
           <label for="curp">Buscar por CURP:</label>
           <input type="text" id="curp" name="curp" value="{{ request.args.get('curp','') }}" placeholder="CURP exacta" />
@@ -42,12 +42,12 @@
         </div>
         <div>
           <button type="submit">Buscar</button>
-          <a href="{{ url_for('admin_panel') }}"><button type="button">Limpiar</button></a>
+          <a href="{{ url_for('ticket_bp.admin_panel') }}"><button type="button">Limpiar</button></a>
         </div>
       </form>
 
       <div style="display:flex;gap:10px;">
-        <a href="{{ url_for('admin_ticket_new') }}"><button type="button">Nuevo Ticket</button></a>
+        <a href="{{ url_for('ticket_bp.admin_ticket_new') }}"><button type="button">Nuevo Ticket</button></a>
       </div>
     </div>
   </div>
@@ -126,10 +126,10 @@
     <div class="form-group full" style="text-align:center;">
       {% if mode == 'edit' %}
         <button type="submit">Guardar cambios</button>
-        <a href="{{ url_for('admin_panel') }}"><button type="button">Cancelar</button></a>
+        <a href="{{ url_for('ticket_bp.admin_panel') }}"><button type="button">Cancelar</button></a>
       {% else %}
         <button type="submit">Registrar</button>
-        <a href="{{ url_for('admin_panel') }}"><button type="button">Cancelar</button></a>
+        <a href="{{ url_for('ticket_bp.admin_panel') }}"><button type="button">Cancelar</button></a>
       {% endif %}
     </div>
   </form>
@@ -175,9 +175,9 @@
           <td style="border:1px solid #000;padding:6px;">{{ t.fecha_generacion }}</td>
           <td style="border:1px solid #000;padding:6px;">{{ t.status }}</td>
           <td class="table-actions" style="border:1px solid #000;padding:6px;">
-            <a href="{{ url_for('ticket_comprobante', id_ticket=t.id_ticket) }}"><button type="button">PDF</button></a>
-            <a href="{{ url_for('admin_ticket_edit', id_ticket=t.id_ticket) }}"><button type="button">Editar</button></a>
-            <form method="POST" action="{{ url_for('admin_ticket_delete', id_ticket=t.id_ticket) }}" onsubmit="return confirm('¿Eliminar ticket #{{ t.id_ticket }}?');">
+            <a href="{{ url_for('ticket_bp.ticket_comprobante', id_ticket=t.id_ticket) }}"><button type="button">PDF</button></a>
+            <a href="{{ url_for('ticket_bp.admin_ticket_edit', id_ticket=t.id_ticket) }}"><button type="button">Editar</button></a>
+            <form method="POST" action="{{ url_for('ticket_bp.admin_ticket_delete', id_ticket=t.id_ticket) }}" onsubmit="return confirm('¿Eliminar ticket #{{ t.id_ticket }}?');">
               <button type="submit">Eliminar</button>
             </form>
           </td>

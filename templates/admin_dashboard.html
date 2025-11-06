@@ -11,18 +11,18 @@
   <h1>Dashboard</h1>
 
   <nav class="top-nav">
-    <a href="{{ url_for('admin_panel') }}">Tickets</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}">Asuntos</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}">Niveles</a>
-    <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}">Municipios</a>
-    <a href="{{ url_for('admin_dashboard') }}" class="active">Dashboard</a>
-    <form method="POST" action="{{ url_for('admin_logout') }}" class="right" style="margin-left:auto;">
+    <a href="{{ url_for('ticket_bp.admin_panel') }}">Tickets</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='asunto') }}">Asuntos</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='nivel') }}">Niveles</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='municipio') }}">Municipios</a>
+    <a href="{{ url_for('dashboard_bp.admin_dashboard') }}" class="active">Dashboard</a>
+    <form method="POST" action="{{ url_for('main_bp.admin_logout') }}" class="right" style="margin-left:auto;">
       <button type="submit">Cerrar sesión</button>
     </form>
   </nav>
 
   <div class="card dashboard-panel">
-    <form method="GET" action="{{ url_for('admin_dashboard') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
+    <form method="GET" action="{{ url_for('dashboard_bp.admin_dashboard') }}" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;">
       <div>
         <label for="municipio">Municipio:</label>
         <select id="municipio" name="municipio">
@@ -53,7 +53,7 @@
     async function loadData() {
       const params = new URLSearchParams();
       if (selectM.value) params.set('municipio', selectM.value);
-      const res = await fetch(`{{ url_for('admin_dashboard_data') }}?` + params.toString(), {credentials:'same-origin'});
+      const res = await fetch(`{{ url_for('dashboard_bp.admin_dashboard_data') }}?` + params.toString(), {credentials:'same-origin'});
       const data = await res.json();
       renderChart(data);
     }
