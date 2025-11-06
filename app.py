@@ -17,6 +17,9 @@ from api.asunto import asuntos_api
 app = Flask(__name__)
 app.secret_key = "clave_secreta_para_flask"
 
+from controllers.ticket_controller import ticket_bp
+app.register_blueprint(ticket_bp)
+
 app.register_blueprint(niveles_api)
 app.register_blueprint(municipios_api)
 app.register_blueprint(asuntos_api)

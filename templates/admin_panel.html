@@ -98,31 +98,20 @@
 
     <div class="form-group">
       <label for="nivel">Nivel:</label>
-      <select id="nivel" name="nivel">
-        <option value="">Seleccione...</option>
-        <option value="1" {% if form_data and form_data['nivel']=='1' %}selected{% endif %}>Primaria</option>
-        <option value="2" {% if form_data and form_data['nivel']=='2' %}selected{% endif %}>Secundaria</option>
-        <option value="3" {% if form_data and form_data['nivel']=='3' %}selected{% endif %}>Bachillerato</option>
+      <select id="nivel" name="nivel" data-selected="{{ form_data['nivel'] if form_data else '' }}">
       </select>
     </div>
 
     <div class="form-group">
       <label for="municipio">Municipio:</label>
-      <select id="municipio" name="municipio">
-        <option value="">Seleccione...</option>
-        <option value="1" {% if form_data and form_data['municipio']=='1' %}selected{% endif %}>Morelos</option>
-        <option value="2" {% if form_data and form_data['municipio']=='2' %}selected{% endif %}>Allende</option>
-        <option value="3" {% if form_data and form_data['municipio']=='3' %}selected{% endif %}>Saltillo</option>
+      <select id="municipio" name="municipio" data-selected="{{ form_data['municipio'] if form_data else '' }}">
       </select>
     </div>
 
     <div class="form-group">
       <label for="asunto">Asunto:</label>
-      <select id="asunto" name="asunto">
-        <option value="">Seleccione...</option>
-        <option value="1" {% if form_data and form_data['asunto']=='1' %}selected{% endif %}>Inscripción</option>
-        <option value="2" {% if form_data and form_data['asunto']=='2' %}selected{% endif %}>Reinscripción</option>
-        <option value="3" {% if form_data and form_data['asunto']=='3' %}selected{% endif %}>Cambio de escuela</option>
+      <select id="asunto" name="asunto" data-selected="{{ form_data['asunto'] if form_data else '' }}">
+      </select>
       </select>
     </div>
 
@@ -202,5 +191,7 @@
     </table>
   </div>
   {% endif %}
+
+  <script src="{{ url_for('static', filename='js/combo_box.js') }}"></script>
 </body>
 </html>

@@ -67,28 +67,19 @@
 
     <div class="form-group full">
       <label for="nivel">Nivel:</label>
-      <select id="nivel" name="nivel">
-        <option value="1" {% if ticket.id_nivel == 1 %}selected{% endif %}>Primaria</option>
-        <option value="2" {% if ticket.id_nivel == 2 %}selected{% endif %}>Secundaria</option>
-        <option value="3" {% if ticket.id_nivel == 3 %}selected{% endif %}>Bachillerato</option>
+      <select id="nivel" name="nivel" data-selected="{{ form_data['nivel'] if form_data else '' }}">
       </select>
     </div>
 
     <div class="form-group full">
       <label for="municipio">Municipio:</label>
-      <select id="municipio" name="municipio" readonly disabled>
-        <option value="1" {% if ticket.id_municipio == 1 %}selected{% endif %}>Morelos</option>
-        <option value="2" {% if ticket.id_municipio == 2 %}selected{% endif %}>Allende</option>
-        <option value="3" {% if ticket.id_municipio == 3 %}selected{% endif %}>Saltillo</option>
+      <select id="municipio" name="municipio" data-selected="{{ form_data['municipio'] if form_data else '' }}">
       </select>
     </div>
 
     <div class="form-group full">
       <label for="asunto">Asunto:</label>
-      <select id="asunto" name="asunto">
-        <option value="1" {% if ticket.id_asunto == 1 %}selected{% endif %}>Inscripción</option>
-        <option value="2" {% if ticket.id_asunto == 2 %}selected{% endif %}>Reinscripción</option>
-        <option value="3" {% if ticket.id_asunto == 3 %}selected{% endif %}>Cambio de escuela</option>
+      <select id="asunto" name="asunto" data-selected="{{ form_data['asunto'] if form_data else '' }}">
       </select>
     </div>
 
@@ -98,5 +89,6 @@
   </form>
 
   <script src="{{ url_for('static', filename='js/form_validation_update.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/combo_box.js') }}"></script>
 </body>
 </html>
