@@ -54,31 +54,22 @@
 
     <div class="form-group full">
       <label for="nivel">¿Nivel al que desea ingresar o que ya cursa el alumno?</label>
-      <select id="nivel" name="nivel">
-        <option value="">Seleccione...</option>
-        <option value="1" {% if form_data and form_data['nivel'] == '1' %}selected{% endif %}>Primaria</option>
-        <option value="2" {% if form_data and form_data['nivel'] == '2' %}selected{% endif %}>Secundaria</option>
-        <option value="3" {% if form_data and form_data['nivel'] == '3' %}selected{% endif %}>Bachillerato</option>
-      </select>
+      <select id="nivel" name="nivel" data-selected="{{ form_data['nivel'] if form_data else '' }}">
+    <option value="">Seleccione...</option>
+  </select>
     </div>
 
     <div class="form-group full">
       <label for="municipio">Municipio donde desea estudie el alumno:</label>
-      <select id="municipio" name="municipio">
+      <select id="municipio" name="municipio" data-selected="{{ form_data['municipio'] if form_data else '' }}">
         <option value="">Seleccione...</option>
-        <option value="1" {% if form_data and form_data['municipio'] == '1' %}selected{% endif %}>Morelos</option>
-        <option value="2" {% if form_data and form_data['municipio'] == '2' %}selected{% endif %}>Allende</option>
-        <option value="3" {% if form_data and form_data['municipio'] == '3' %}selected{% endif %}>Saltillo</option>
       </select>
     </div>
 
     <div class="form-group full">
       <label for="asunto">Seleccione el asunto que va a tratar:</label>
-      <select id="asunto" name="asunto">
+      <select id="asunto" name="asunto" data-selected="{{ form_data['asunto'] if form_data else '' }}">
         <option value="">Seleccione...</option>
-        <option value="1" {% if form_data and form_data['asunto'] == '1' %}selected{% endif %}>Inscripción</option>
-        <option value="2" {% if form_data and form_data['asunto'] == '2' %}selected{% endif %}>Reinscripción</option>
-        <option value="3" {% if form_data and form_data['asunto'] == '3' %}selected{% endif %}>Cambio de escuela</option>
       </select>
     </div>
 
@@ -88,5 +79,7 @@
   </form>
 
   <script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/combo_box.js') }}"></script>
+
 </body>
 </html>

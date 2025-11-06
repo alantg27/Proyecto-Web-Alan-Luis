@@ -5,9 +5,16 @@ import random
 import io
 import string
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from api.niveles import niveles_api
+from api.municipios import municipios_api
+from api.asunto import asuntos_api
 
 app = Flask(__name__)
 app.secret_key = "clave_secreta_para_flask"
+
+app.register_blueprint(niveles_api)
+app.register_blueprint(municipios_api)
+app.register_blueprint(asuntos_api)
 
 def generar_captcha_text(length=5):
     chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"  # evitar O,0,I,1 confusos
@@ -173,8 +180,7 @@ def ticket():
         )
         t.guardar()
 
-        flash("Formulario enviado y ticket registrado correctamente", "success")
-        return redirect(url_for("ticket"))
+        return redirect(url_for("publico"))
 
     return render_template("ticket.html")
 
@@ -190,7 +196,6 @@ def modificar_publico():
         if ticket:
             return redirect(url_for("editar_publico", id_ticket=ticket["id_ticket"]))
         else:
-            flash("No se encontró un ticket con esos datos.", "error")
             return render_template("modificar_publico.html", form_data=request.form)
 
     return render_template("modificar_publico.html")
@@ -200,7 +205,6 @@ def modificar_publico():
 def editar_publico(id_ticket):
     ticket = Ticket.obtener_por_id(id_ticket)
     if not ticket:
-        flash("Ticket no encontrado.", "error")
         return redirect(url_for("modificar_publico"))
 
     if request.method == "POST":

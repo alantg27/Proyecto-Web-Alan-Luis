@@ -52,10 +52,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (valido) {
       const confirmacion = confirm("¿Está seguro de que desea generar el ticket?");
-    if (confirmacion) {
-      window.location.href = "{{ url_for('publico') }}";
-      form.submit();
-    }
+      if (confirmacion) {
+        form.submit();
+      }
     }
   });
 });
