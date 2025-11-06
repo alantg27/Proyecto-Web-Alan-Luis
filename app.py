@@ -9,12 +9,14 @@ def create_app():
     from controllers.ticket_controller import ticket_bp
     from controllers.catalogos_controller import catalogos_bp
     from controllers.dashboard_controller import dashboard_bp
+    from controllers.api_controller import api_bp
 
     # === REGISTRO ===
     app.register_blueprint(main_bp)
     app.register_blueprint(ticket_bp)
     app.register_blueprint(catalogos_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(api_bp)
 
     # === INICIALIZAR DB UNA VEZ ===
     #from models.db import DB
