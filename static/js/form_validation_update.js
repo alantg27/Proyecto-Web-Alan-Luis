@@ -52,8 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const exito = document.body.dataset.exito;
   if (exito === "true") {
-    if (confirm("Ticket actualizado correctamente. ¿Desea regresar al menú público?")) {
-        window.location.href = "/publico";
+    // Descargar PDF en segundo plano
+    const idTicket = document.body.dataset.idticket;
+    if (idTicket) {
+      const iframe = document.createElement("iframe");
+      iframe.style.display = "none";
+      iframe.src = `/comprobante/${idTicket}`;
+      document.body.appendChild(iframe);
     }
-}
+    // Regresar automáticamente al menú público
+    setTimeout(() => { window.location.href = "/publico"; }, 1200);
+   }
 });

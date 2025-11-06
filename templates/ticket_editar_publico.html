@@ -6,7 +6,7 @@
   <title>Editar Ticket - Público</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
 </head>
-<body>
+<body data-exito="{{ 'true' if exito else 'false' }}" data-idticket="{{ ticket.id_ticket }}">
   <h1>Editar Ticket</h1>
 
   <!-- Barra superior con botón Regresar -->
@@ -98,6 +98,5 @@
   </form>
 
   <script src="{{ url_for('static', filename='js/form_validation_update.js') }}"></script>
-  <body data-exito="{{ 'true' if exito else 'false' }}"></body>
 </body>
 </html>

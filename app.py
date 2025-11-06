@@ -305,7 +305,7 @@ def editar_publico(id_ticket):
 
         Ticket.actualizar(id_ticket, nuevos_datos)
         ticket = Ticket.obtener_por_id(id_ticket)
-        return render_template("ticket_editar_publico.html", ticket=ticket, exito=True)
+        return render_template("ticket_editar_publico.html", ticket=ticket, exito=True, id_ticket=id_ticket)
 
     return render_template("ticket_editar_publico.html", ticket=ticket)
 
