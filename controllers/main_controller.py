@@ -100,6 +100,14 @@ def admin():
         session["captcha_text"] = generar_captcha_text()
         return render_template("admin_login.html")
 
+    # Verificar si existe una solicitud pendiente
+    from models.admin_request import AdminRequest
+    solicitud = AdminRequest.get_by_username(usuario)
+    if solicitud and solicitud["estado"] == "pendiente":
+        flash("Tu solicitud de registro está en revisión. Por favor espera a que un administrador la apruebe.", "error")
+        session["captcha_text"] = generar_captcha_text()
+        return render_template("admin_login.html")
+
     row = Admin.get_by_username(usuario)
     if not row or not check_password_hash(row["password_hash"], contrasena):
         flash("Usuario o contraseña inválidos.", "error")
