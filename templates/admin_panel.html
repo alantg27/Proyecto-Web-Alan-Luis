@@ -10,7 +10,7 @@
   <h1>Panel de Administración</h1>
 
   <nav class="top-nav">
-    <a href="{{ url_for('admin_panel') }}" class="{% if request.endpoint in ['admin_panel','admin_ticket_new','admin_ticket_edit'] %}active{% endif %}">Tickets</a>
+    <a href="{{ url_for('ticket_bp.admin_panel') }}" class="{% if request.endpoint in ['admin_panel','admin_ticket_new','admin_ticket_edit'] %}active{% endif %}">Tickets</a>
     <a href="{{ url_for('admin_catalog_list', tipo='asunto') }}">Asuntos</a>
     <a href="{{ url_for('admin_catalog_list', tipo='nivel') }}">Niveles</a>
     <a href="{{ url_for('admin_catalog_list', tipo='municipio') }}">Municipios</a>

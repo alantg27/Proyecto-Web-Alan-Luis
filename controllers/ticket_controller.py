@@ -1,8 +1,8 @@
 import io
 import re
-from flask import app, flash, redirect, render_template, request, send_file, url_for
+from flask import flash, redirect, render_template, request, send_file, url_for,Blueprint, jsonify
 import qrcode
-from controllers.ticket_controller import ticket_bp
+from controllers.main_controller import _require_admin
 from models.ticket import Ticket
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
@@ -10,10 +10,10 @@ from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
 from models.catalogos_api import obtener_niveles, obtener_municipios, obtener_asuntos
 
+ticket_bp = Blueprint('ticket_bp', __name__)
 
 
-
-@app.route("/ticket", methods=["GET", "POST"])
+@ticket_bp.route("/ticket", methods=["GET", "POST"])
 def ticket():
     if request.method == "POST":
         errores = []
@@ -86,7 +86,7 @@ def ticket():
 
 
 # Formulario para buscar ticket público
-@app.route("/modificar_publico", methods=["GET", "POST"])
+@ticket_bp.route("/modificar_publico", methods=["GET", "POST"])
 def modificar_publico():
     if request.method == "POST":
         curp = request.form.get("curp", "").strip().upper()
@@ -102,7 +102,7 @@ def modificar_publico():
     return render_template("modificar_publico.html")
 
 # Editar ticket público
-@app.route("/modificar_publico/editar/<int:id_ticket>", methods=["GET", "POST"])
+@ticket_bp.route("/modificar_publico/editar/<int:id_ticket>", methods=["GET", "POST"])
 def editar_publico(id_ticket):
     ticket = Ticket.obtener_por_id(id_ticket)
     if not ticket:
@@ -132,7 +132,7 @@ def editar_publico(id_ticket):
     return render_template("ticket_editar_publico.html", ticket=ticket)
 
 
-@app.route("/comprobante/<int:id_ticket>", methods=["GET"])
+@ticket_bp.route("/comprobante/<int:id_ticket>", methods=["GET"])
 def ticket_comprobante(id_ticket):
     row = Ticket.obtener_por_id(id_ticket)
     if not row:
@@ -204,3 +204,173 @@ def generar_pdf_comprobante_row(row):
     c.save()
     buf.seek(0)
     return buf
+
+
+# PANEL: listar y buscar
+@ticket_bp.route("/admin/panel", methods=["GET"])
+def admin_panel():
+    if not _require_admin():
+        return redirect(url_for("admin"))
+    curp = request.args.get("curp", "").strip().upper()
+    q = request.args.get("q", "").strip()
+    if curp:
+        tickets = Ticket.buscar(curp=curp)
+    elif q:
+        tickets = Ticket.buscar(q=q)
+    else:
+        tickets = Ticket.obtener_todos()
+    return render_template("admin_panel.html", mode="list", tickets=tickets, form_data=None)
+
+
+# CREAR
+@ticket_bp.route("/admin/ticket/new", methods=["GET", "POST"])
+def admin_ticket_new():
+    if not _require_admin():
+        return redirect(url_for("admin"))
+    if request.method == "GET":
+        return render_template("admin_panel.html", mode="new", tickets=[], form_data={})
+
+    # POST crear
+    nombre_completo = request.form.get("nombreCompleto", "").strip()
+    curp = request.form.get("curp", "").strip().upper()
+    nombre = request.form.get("nombre", "").strip()
+    paterno = request.form.get("paterno", "").strip()
+    materno = request.form.get("materno", "").strip()
+    telefono = request.form.get("telefono", "").strip()
+    celular = request.form.get("celular", "").strip()
+    correo = request.form.get("correo", "").strip()
+    id_nivel = request.form.get("nivel")
+    id_municipio = request.form.get("municipio")
+    id_asunto = request.form.get("asunto")
+    status = request.form.get("status", "Pendiente")
+    if status not in ("Pendiente", "Resuelto"):
+        status = "Pendiente"
+
+    errores = []
+    if not nombre_completo or not curp or not correo:
+        errores.append("Los campos Nombre completo, CURP y Correo son obligatorios.")
+    if not re.match(r"^[A-Z0-9]{18}$", curp):
+        errores.append("La CURP debe tener 18 caracteres alfanuméricos.")
+    if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", correo):
+        errores.append("El correo electrónico no es válido.")
+    if telefono and not re.match(r"^[0-9]{10}$", telefono):
+        errores.append("El teléfono debe tener 10 dígitos numéricos.")
+    if celular and not re.match(r"^[0-9]{10}$", celular):
+        errores.append("El celular debe tener 10 dígitos numéricos.")
+    if not id_nivel or not id_municipio or not id_asunto:
+        errores.append("Debe seleccionar nivel, municipio y asunto.")
+    if Ticket.existe_curp(curp):
+        errores.append("El CURP ingresado ya se encuentra registrado.")
+
+    if errores:
+        for e in errores:
+            flash(e, "error")
+        return render_template("admin_panel.html", mode="new", tickets=[], form_data=request.form)
+
+    t = Ticket(
+        nombre_completo=nombre_completo, curp=curp,
+        nombre=nombre, paterno=paterno, materno=materno,
+        telefono=telefono, celular=celular, correo=correo,
+        id_nivel=id_nivel, id_municipio=id_municipio, id_asunto=id_asunto,
+        status=status
+    )
+    t.guardar()
+    flash("Ticket creado correctamente.", "success")
+    return redirect(url_for("admin_panel"))
+
+# EDITAR
+@ticket_bp.route("/admin/ticket/<int:id_ticket>/edit", methods=["GET", "POST"])
+def admin_ticket_edit(id_ticket):
+    if not _require_admin():
+        return redirect(url_for("admin"))
+    if request.method == "GET":
+        row = Ticket.obtener_por_id(id_ticket)
+        if not row:
+            flash("Ticket no encontrado.", "error")
+            return redirect(url_for("admin_panel"))
+        # Adaptamos nombres para el formulario
+        form_data = {
+            "nombreCompleto": row.get("nombre_completo", ""),
+            "curp": row.get("curp", ""),
+            "nombre": row.get("nombre", ""),
+            "paterno": row.get("paterno", ""),
+            "materno": row.get("materno", ""),
+            "telefono": row.get("telefono", ""),
+            "celular": row.get("celular", ""),
+            "correo": row.get("correo", ""),
+            "nivel": str(row.get("id_nivel") or ""),
+            "municipio": str(row.get("id_municipio") or ""),
+            "asunto": str(row.get("id_asunto") or ""),
+            "status": row.get("status", "Pendiente"),
+        }
+        return render_template("admin_panel.html", mode="edit", tickets=[], form_data=form_data, id_ticket=id_ticket)
+
+    # POST actualizar
+    nombre_completo = request.form.get("nombreCompleto", "").strip()
+    curp = request.form.get("curp", "").strip().upper()
+    nombre = request.form.get("nombre", "").strip()
+    paterno = request.form.get("paterno", "").strip()
+    materno = request.form.get("materno", "").strip()
+    telefono = request.form.get("telefono", "").strip()
+    celular = request.form.get("celular", "").strip()
+    correo = request.form.get("correo", "").strip()
+    id_nivel = request.form.get("nivel")
+    id_municipio = request.form.get("municipio")
+    id_asunto = request.form.get("asunto")
+    status = request.form.get("status", "Pendiente")
+    if status not in ("Pendiente", "Resuelto"):
+        status = "Pendiente"
+
+    errores = []
+    if not nombre_completo or not curp or not correo:
+        errores.append("Los campos Nombre completo, CURP y Correo son obligatorios.")
+    if not re.match(r"^[A-Z0-9]{18}$", curp):
+        errores.append("La CURP debe tener 18 caracteres alfanuméricos.")
+    if not re.match(r"^[^\s@]+@[^\s@]+\.[^\s@]+$", correo):
+        errores.append("El correo electrónico no es válido.")
+    if telefono and not re.match(r"^[0-9]{10}$", telefono):
+        errores.append("El teléfono debe tener 10 dígitos numéricos.")
+    if celular and not re.match(r"^[0-9]{10}$", celular):
+        errores.append("El celular debe tener 10 dígitos numéricos.")
+    if not id_nivel or not id_municipio or not id_asunto:
+        errores.append("Debe seleccionar nivel, municipio y asunto.")
+
+    # Evitar CURP duplicado de otro registro
+    row_actual = Ticket.obtener_por_id(id_ticket)
+    if not row_actual:
+        flash("Ticket no encontrado.", "error")
+        return redirect(url_for("admin_panel"))
+    if curp != (row_actual.get("curp") or "") and Ticket.existe_curp_activo(curp):
+        errores.append("El CURP ingresado ya se encuentra registrado en otro ticket pendiente.")
+
+    if errores:
+        for e in errores:
+            flash(e, "error")
+        return render_template("admin_panel.html", mode="edit", tickets=[], form_data=request.form, id_ticket=id_ticket)
+
+    nuevos = {
+        "nombre_completo": nombre_completo,
+        "curp": curp,
+        "nombre": nombre,
+        "paterno": paterno,
+        "materno": materno,
+        "telefono": telefono,
+        "celular": celular,
+        "correo": correo,
+        "id_nivel": id_nivel,
+        "id_municipio": id_municipio,
+        "id_asunto": id_asunto,
+        "status": status
+    }
+    Ticket.actualizar(id_ticket, nuevos)
+    flash("Ticket actualizado correctamente.", "success")
+    return redirect(url_for("admin_panel"))
+
+# ELIMINAR
+@ticket_bp.route("/admin/ticket/<int:id_ticket>/delete", methods=["POST"])
+def admin_ticket_delete(id_ticket):
+    if not _require_admin():
+        return redirect(url_for("admin"))
+    Ticket.eliminar(id_ticket)
+    flash("Ticket eliminado.", "success")
+    return redirect(url_for("admin_panel"))

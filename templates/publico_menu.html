@@ -10,7 +10,7 @@
 
   <!-- Barra superior con botón Regresar-->
   <div class="top-nav" style="background:none;border:none; justify-content:flex-end;">
-    <a href="{{ url_for('index') }}" class="right">Regresar</a>
+    <a href="{{ url_for('main_bp.index') }}" class="right">Regresar</a>
   </div>
 
   <h1>Menú Público</h1>
@@ -20,12 +20,12 @@
 
     <div style="display:flex;gap:20px;justify-content:center;flex-wrap:wrap;">
       <!-- Botón Generar Ticket -->
-      <a href="{{ url_for('ticket') }}" style="text-decoration:none;">
+      <a href="{{ url_for('ticket_bp.ticket') }}" style="text-decoration:none;">
         <button type="button">Generar Ticket</button>
       </a>
 
       <!-- Botón Modificar Ticket -->
-      <a href="{{ url_for('modificar_publico') }}" style="text-decoration:none;">
+      <a href="{{ url_for('ticket_bp.modificar_publico') }}" style="text-decoration:none;">
         <button type="button">Modificar Ticket</button>
       </a>
     </div>
