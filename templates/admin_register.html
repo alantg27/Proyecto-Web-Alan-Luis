@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro de Administrador</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Registro de Administrador</h1>
+
+  {% set messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <form method="POST" style="max-width:600px;margin:0 auto;">
+    <div class="form-group full">
+      <label for="nombre">Nombre completo (opcional):</label>
+      <input type="text" id="nombre" name="nombre" value="{{ form_data['nombre'] if form_data else '' }}">
+    </div>
+    <div class="form-group full">
+      <label for="email">Correo (opcional):</label>
+      <input type="email" id="email" name="email" value="{{ form_data['email'] if form_data else '' }}">
+    </div>
+    <div class="form-group full">
+      <label for="usuario">Usuario:</label>
+      <input type="text" id="usuario" name="usuario" value="{{ form_data['usuario'] if form_data else '' }}">
+    </div>
+    <div class="form-group">
+      <label for="contrasena">Contraseña:</label>
+      <input type="password" id="contrasena" name="contrasena" value="">
+    </div>
+    <div class="form-group">
+      <label for="confirmar">Confirmar contraseña:</label>
+      <input type="password" id="confirmar" name="confirmar" value="">
+    </div>
+    <div class="form-group full" style="text-align:center;">
+      <button type="submit">Enviar solicitud</button>
+      <a href="{{ url_for('main_bp.admin') }}"><button type="button">Cancelar</button></a>
+    </div>
+  </form>
+</body>
+</html>

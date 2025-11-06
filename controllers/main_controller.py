@@ -1,6 +1,7 @@
-from tkinter import Image
-from flask import Blueprint, session
 from flask import render_template, request, redirect, url_for, flash, session, send_file, jsonify, Blueprint
+from werkzeug.security import check_password_hash
+from models.admin import Admin
+from models.admin_request import AdminRequest
 import random
 import io
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
@@ -99,18 +100,17 @@ def admin():
         session["captcha_text"] = generar_captcha_text()
         return render_template("admin_login.html")
 
-    # credenciales de ejemplo (temporal, reemplazar por BDD cuando esté disponible)
-    ADMIN_USER = "admin"
-    ADMIN_PASS = "admin123"
-
-    if usuario == ADMIN_USER and contrasena == ADMIN_PASS:
-        session.pop("captcha_text", None)
-        session["is_admin"] = True
-        return redirect(url_for("ticket_bp.admin_panel"))
-    else:
+    row = Admin.get_by_username(usuario)
+    if not row or not check_password_hash(row["password_hash"], contrasena):
         flash("Usuario o contraseña inválidos.", "error")
         session["captcha_text"] = generar_captcha_text()
         return render_template("admin_login.html")
+
+    session.pop("captcha_text", None)
+    session["is_admin"] = True
+    session["admin_id"] = row["id_admin"]
+    session["admin_username"] = row["username"]
+    return redirect(url_for("ticket_bp.admin_panel"))
     
 
 
@@ -139,3 +139,37 @@ def add_no_cache_headers(response):
     response.headers["Pragma"] = "no-cache"
     response.headers["Expires"] = "0"
     return response
+
+
+@main_bp.route("/admin/register", methods=["GET", "POST"])
+def admin_register():
+    if request.method == "GET":
+        return render_template("admin_register.html", form_data={})
+
+    usuario = request.form.get("usuario","").strip()
+    contrasena = request.form.get("contrasena","")
+    confirmar = request.form.get("confirmar","")
+    nombre = request.form.get("nombre","").strip()
+    email = request.form.get("email","").strip()
+
+    errores = []
+    if not usuario or not contrasena or not confirmar:
+        errores.append("Usuario y contraseña son obligatorios.")
+    if contrasena != confirmar:
+        errores.append("Las contraseñas no coinciden.")
+    if email and ("@" not in email or "." not in email):
+        errores.append("Correo no válido.")
+
+    if errores:
+        for e in errores:
+            flash(e, "error")
+        return render_template("admin_register.html", form_data=request.form)
+
+    try:
+        AdminRequest.create(username=usuario, password_plain=contrasena, nombre=nombre, email=email)
+    except ValueError as ex:
+        flash(str(ex), "error")
+        return render_template("admin_register.html", form_data=request.form)
+
+    flash("Solicitud enviada. Un administrador la revisará para su aprobación.", "success")
+    return redirect(url_for("main_bp.admin"))

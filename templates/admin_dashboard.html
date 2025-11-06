@@ -16,6 +16,7 @@
     <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='nivel') }}">Niveles</a>
     <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='municipio') }}">Municipios</a>
     <a href="{{ url_for('dashboard_bp.admin_dashboard') }}" class="active">Dashboard</a>
+    <a href="{{ url_for('solicitudes_bp.admin_solicitudes') }}">Solicitudes</a>
     <form method="POST" action="{{ url_for('main_bp.admin_logout') }}" class="right" style="margin-left:auto;">
       <button type="submit">Cerrar sesión</button>
     </form>

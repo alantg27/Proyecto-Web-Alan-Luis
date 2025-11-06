@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solicitudes de Registro</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/tarea3.css') }}">
+</head>
+<body>
+  <h1>Solicitudes de Registro</h1>
+
+  <nav class="top-nav">
+    <a href="{{ url_for('ticket_bp.admin_panel') }}">Tickets</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='asunto') }}">Asuntos</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='nivel') }}">Niveles</a>
+    <a href="{{ url_for('catalogos_bp.admin_catalog_list', tipo='municipio') }}">Municipios</a>
+    <a href="{{ url_for('dashboard_bp.admin_dashboard') }}">Dashboard</a>
+    <a href="{{ url_for('solicitudes_bp.admin_solicitudes') }}" class="active">Solicitudes</a>
+    <form method="POST" action="{{ url_for('main_bp.admin_logout') }}" class="right" style="margin-left:auto;">
+      <button type="submit">Cerrar sesión</button>
+    </form>
+  </nav>
+
+  {% set messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div style="max-width:900px;margin:0 auto;background:#fff;border:2px solid #000;padding:15px;">
+    <form method="GET" action="{{ url_for('solicitudes_bp.admin_solicitudes') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <label for="estado">Estado:</label>
+      <select id="estado" name="estado">
+        <option value="pendiente" {% if estado=='pendiente' %}selected{% endif %}>Pendiente</option>
+        <option value="aprobado" {% if estado=='aprobado' %}selected{% endif %}>Aprobado</option>
+        <option value="rechazado" {% if estado=='rechazado' %}selected{% endif %}>Rechazado</option>
+      </select>
+      <button type="submit">Filtrar</button>
+    </form>
+  </div>
+
+  <div style="overflow:auto; max-width:900px; margin:15px auto; background:#fff; border:2px solid #000;">
+    <table style="width:100%; border-collapse:collapse;">
+      <thead>
+        <tr>
+          <th style="border:1px solid #000;padding:6px;">ID</th>
+          <th style="border:1px solid #000;padding:6px;">Usuario</th>
+          <th style="border:1px solid #000;padding:6px;">Nombre</th>
+          <th style="border:1px solid #000;padding:6px;">Correo</th>
+          <th style="border:1px solid #000;padding:6px;">Estado</th>
+          <th style="border:1px solid #000;padding:6px;">Creado</th>
+          <th style="border:1px solid #000;padding:6px;">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in items %}
+        <tr>
+          <td style="border:1px solid #000;padding:6px;">{{ r.id_request }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ r.username }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ r.nombre or '' }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ r.email or '' }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ r.estado }}</td>
+          <td style="border:1px solid #000;padding:6px;">{{ r.creado_en }}</td>
+          <td class="table-actions" style="border:1px solid #000;padding:6px;">
+            {% if r.estado == 'pendiente' %}
+              <form method="POST" action="{{ url_for('solicitudes_bp.admin_solicitud_approve', id_request=r.id_request) }}" onsubmit="return confirm('¿Aprobar solicitud de {{ r.username }}?');">
+                <button type="submit">Aprobar</button>
+              </form>
+              <form method="POST" action="{{ url_for('solicitudes_bp.admin_solicitud_reject', id_request=r.id_request) }}" onsubmit="return confirm('¿Rechazar solicitud de {{ r.username }}?');" style="margin-left:6px;">
+                <input type="hidden" name="motivo" value="">
+                <button type="submit">Rechazar</button>
+              </form>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" style="text-align:center; padding:10px;">Sin solicitudes.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>
